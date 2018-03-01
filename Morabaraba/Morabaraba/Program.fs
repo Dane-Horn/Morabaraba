@@ -11,6 +11,7 @@ type Piece =
 type Cell = 
     {   
         pos : char*int
+        state : string
     }
 [<EntryPoint>]
 let main argv = 
