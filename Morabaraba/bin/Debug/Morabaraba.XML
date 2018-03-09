@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>Morabaraba</name></assembly>
+<members>
+<member name="M:MorabarabaGame.runGame">
+<summary>
+ Runs main game loop and displays a message based on final game state
+</summary>
+</member>
+<member name="M:MorabarabaGame.runMovingPhase(MorabarabaGame.Board,MorabarabaGame.Player,System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Int32)">
+ <summary>Executes the entire moving phase for Morabaraba </summary>
+ <param name="board"> Board record holding the boardState and player stones </param>
+ <param name="player"> The current player </param>
+ <param name="lastXPlay"> Last full move for player X (piece selected and where it was moved to) </param>
+ <param name="lastOPlay"> Last full move for player O (piece selected and where it was moved to) </param>
+ <param name="endCounter"> Draw counter that is incremented when both players have 3 stones, game is drawn when counter reaches 10 </param>
+ <returns> GameState once all play has been concluded </returns>
+</member>
+<member name="M:MorabarabaGame.changeAlltoFlying(MorabarabaGame.Board,MorabarabaGame.Player)">
+ <summary>
+ Changes all the pieces of the provided player form Normal of Player to Flying of Player, 
+ this happens when the player reaches 3 Cows on board
+ </summary>
+ <param name="board"> The current board</param>
+ <param name="player"> The player whose cows must be changed</param>
+</member>
+<member name="M:MorabarabaGame.canPlay(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},MorabarabaGame.Player)">
+ <summary>
+ Checks whether the provided player can make a move
+ </summary>
+ <param name="board">The current board state</param>
+ <param name="player">The player to check</param>
+</member>
+<member name="M:MorabarabaGame.movePiece(MorabarabaGame.Board,MorabarabaGame.Player)">
+ <summary>
+ Selects a piece to move, gets recursively called until valid input is given
+ then calls either doNormalMove or doFlyingMove based on the piece chosen
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="player"> The current player </param>
+</member>
+<member name="M:MorabarabaGame.doNormalMove(MorabarabaGame.Board,Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},MorabarabaGame.Player,System.Char,System.Int32)">
+ <summary>
+ Moves the chosen Normal cow to an adjacent Empty square (neighbour)
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="neighbours"> A Cell list of adjacent squares </param>
+ <param name="player"> The current player </param>
+ <param name="takePos"> The position from which the piece was taken </param>
+</member>
+<member name="M:MorabarabaGame.doFlyingMove(MorabarabaGame.Board,MorabarabaGame.Player,System.Char,System.Int32)">
+ <summary>
+ Moves the chosen Flying cow to an Empty square
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="player"> The current player </param>
+ <param name="takePos"> The position from which the piece was taken </param>
+</member>
+<member name="M:MorabarabaGame.getNeighbourCells(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},System.Char,System.Int32)">
+ <summary>
+ Gets all cell's neighbour states
+ </summary>
+ <param name="board"> The current board state </param>
+ <param name="pos"> The position of the cell being checked </param>
+</member>
+<member name="M:MorabarabaGame.getAdjacentSquares(System.Char,System.Int32)">
+<summary>
+Takes a position and returns the positions of the adjacent squares
+</summary>
+</member>
+<member name="M:MorabarabaGame.runPlacingPhase(MorabarabaGame.Board,MorabarabaGame.Player)">
+ <summary>
+ Executes the entire placing phase for Morabaraba
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="player"> The current player </param>
+</member>
+<member name="M:MorabarabaGame.placePiece(MorabarabaGame.Board,MorabarabaGame.Player)">
+ <summary>
+ Places one of the player's stones onto the board as a Cow of Normal Player
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="player"> The current player </param>
+</member>
+<member name="M:MorabarabaGame.shootCow(MorabarabaGame.Board,MorabarabaGame.Player)">
+ <summary>
+ After player has completed a mill, this checks that an opponent's cow can be shot
+ and if so replaces the chosen Cow with Empty
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="player"> The curren player </param>
+</member>
+<member name="M:MorabarabaGame.isInMill(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},System.Char,System.Int32)">
+ <summary>
+ Checks if the Cell with pos=playPos is in a mill
+ </summary>
+ <param name="board"> The current board state </param>
+ <param name="playPos"> The chosen position to check </param>
+</member>
+<member name="M:MorabarabaGame.updateSquare(MorabarabaGame.Board,System.Char,System.Int32,MorabarabaGame.Cow)">
+ <summary>
+ Updates Cell with pos=pos to have state = newState
+ </summary>
+ <param name="board"> The current board </param>
+ <param name="pos"> The position to update </param>
+ <param name="newState"> New state to update to </param>
+</member>
+<member name="M:MorabarabaGame.getStateFromPos(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},System.Char,System.Int32)">
+<summary>
+ Takes position pos and returns the state of Cell with pos=pos
+ in board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getCellFromPos(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},System.Char,System.Int32)">
+<summary>
+ Takes position pos and returns the Cell with pos=pos
+ in board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getPosFromUser(System.String,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit})">
+ <summary>
+ Gets a position of type char*int from the user.
+ The function is recursively called until valid input is given
+ </summary>
+ <param name="msg"> Input prompt to display </param>
+</member>
+<member name="M:MorabarabaGame.isValidPos(System.Char,System.Int32)">
+<summary>
+ Takes a position and returns whether or not it matches the valid positions
+ for the standard Morabaraba board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getEmptySquares(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell})">
+<summary>
+ returns all empty squares present in board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getNumPlayerSquares(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},MorabarabaGame.Player)">
+<summary>
+ returns the number of squares player has on board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getPlayerSquares(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell},MorabarabaGame.Player)">
+<summary>
+ returns the Cells that belong to player on board
+</summary>
+</member>
+<member name="M:MorabarabaGame.getOpponent(MorabarabaGame.Player)">
+<summary>
+ gets the player that is not player
+</summary>
+</member>
+<member name="M:MorabarabaGame.genericErrorMsg(System.String,System.Boolean)">
+<summary>
+ displays an error message with an optional prompt before continuing with
+ execution
+</summary>
+</member>
+<member name="M:MorabarabaGame.refreshBoard(MorabarabaGame.Board,Microsoft.FSharp.Core.Unit)">
+<summary>
+ clears the console and displays the board and player stones
+</summary>
+</member>
+<member name="M:MorabarabaGame.displayScore(System.Int32,System.Int32)">
+<summary>
+displays the stones for each player
+</summary>
+</member>
+<member name="M:MorabarabaGame.displayBoard(System.String)">
+<summary>
+ takes string representation of the board and displays it
+</summary>
+</member>
+<member name="M:MorabarabaGame.boardToString(Microsoft.FSharp.Collections.FSharpList{MorabarabaGame.Cell})">
+<summary>
+ converts the board into a string for consistent iteraction between
+ backend and UI
+</summary>
+</member>
+<member name="M:MorabarabaGame.playerToString(MorabarabaGame.Player)">
+<summary>
+ gets string representation of player
+</summary>
+</member>
+</members>
+</doc>
