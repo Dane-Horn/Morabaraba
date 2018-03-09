@@ -15,8 +15,6 @@ type Cow =
 type GameState =
 |PlacingPhase
 |MovingPhase
-|FlyingPhase of Player
-|BothFlyingPhase
 |Drawn
 |Won of Player
 
