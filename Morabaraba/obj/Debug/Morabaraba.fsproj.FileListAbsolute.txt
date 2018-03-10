@@ -43,3 +43,12 @@ C:\Users\g16h0403\source\repos\Morabaraba\Morabaraba\bin\Debug\System.ValueTuple
 C:\Users\g16h0403\source\repos\Morabaraba\Morabaraba\bin\Debug\FSharp.Core.xml
 C:\Users\g16h0403\source\repos\Morabaraba\Morabaraba\obj\Debug\Morabaraba.exe
 C:\Users\g16h0403\source\repos\Morabaraba\Morabaraba\obj\Debug\Morabaraba.pdb
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\Morabaraba.exe.config
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\Morabaraba.XML
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\Morabaraba.exe
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\Morabaraba.pdb
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\FSharp.Core.dll
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\System.ValueTuple.dll
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\bin\Debug\FSharp.Core.xml
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\obj\Debug\Morabaraba.exe
+C:\Users\Dane\Source\Repos\Final_Morabaraba\Morabaraba\obj\Debug\Morabaraba.pdb
