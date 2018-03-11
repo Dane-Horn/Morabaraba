@@ -3,17 +3,7 @@
 open System
 open System.Runtime.ExceptionServices
 
-let cprintf color (msg : string) =
-    let old = Console.ForegroundColor
-    Console.ForegroundColor <- color
-    Console.Write msg
-    Console.ForegroundColor <- old
 
-let cprintfn color (msg : string) =
-    let old = Console.ForegroundColor
-    Console.ForegroundColor <- color
-    Console.WriteLine msg
-    Console.ForegroundColor <- old
 
 
 //TYPE DEFINITIONS------------------------------------------------------------------------------------------------------------------
@@ -85,6 +75,21 @@ let mills = [
 
 
 //DISPLAY FUNCTIONS-----------------------------------------------------------------------------------------------------------------
+///Print msg to the console with color
+let cprintf color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.Write msg
+    Console.ForegroundColor <- old
+
+///Print msg ending in a newline to the console with color
+let cprintfn color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.WriteLine msg
+    Console.ForegroundColor <- old
+
+///Prints a piece in a certain colour depending on what it is
 let printPiece c =
     match c with 
     | 'X' -> cprintf XColour "X"

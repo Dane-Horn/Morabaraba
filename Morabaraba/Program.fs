@@ -1,11 +1,5 @@
 ﻿open System
 
-let cprintf color (msg : string) =
-    let old = Console.ForegroundColor
-    Console.ForegroundColor <- color
-    Console.Write msg
-    Console.ForegroundColor <- old
-
 let cprintfn color (msg : string) =
     let old = Console.ForegroundColor
     Console.ForegroundColor <- color
