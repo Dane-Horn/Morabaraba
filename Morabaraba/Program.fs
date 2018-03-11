@@ -1,5 +1,18 @@
 ﻿open System
 
+let cprintf color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.Write msg
+    Console.ForegroundColor <- old
+
+let cprintfn color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.WriteLine msg
+    Console.ForegroundColor <- old
+
+
 let displayCredits () =
     Console.Clear ()
     printfn "Morabaraba\n\n\
@@ -51,11 +64,14 @@ let displayMenu (menuItems : string list) =
     let rec menu state =
         Console.Clear ()
         let mapSelection i item =
-            match i = (state % menuItems.Length) with
+            match i = state with
             | false -> item
             | true ->
                 ">" + item
-        List.iter (fun item -> printfn "%s" item) (List.mapi mapSelection menuItems)
+        List.iteri (fun index item -> 
+                        match index = state with
+                        | false -> printfn "%s" item
+                        | true -> cprintfn ConsoleColor.DarkGray item) (List.mapi mapSelection menuItems)
 
         let inputKey = (Console.ReadKey ()).Key
         match inputKey with
@@ -63,9 +79,9 @@ let displayMenu (menuItems : string list) =
             match state = 0 with
             | false -> menu (state-1)
             | true -> menu (menuItems.Length - 1)
-        | ConsoleKey.DownArrow -> menu (state+1)
+        | ConsoleKey.DownArrow -> menu ((state+1) % menuItems.Length)
         | ConsoleKey.Escape -> -1
-        | ConsoleKey.Enter -> state%menuItems.Length
+        | ConsoleKey.Enter -> state
         | _ -> menu state
     menu 0
 
@@ -84,6 +100,7 @@ let rec mainMenu () =
     | 3 | -1 ->
         printfn "Good bye"
     | _ -> failwith "Error"
+
 [<EntryPoint>]
 let main argv =
     mainMenu ()

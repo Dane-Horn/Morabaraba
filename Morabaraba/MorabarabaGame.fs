@@ -2,7 +2,24 @@
 
 open System
 open System.Runtime.ExceptionServices
+
+let cprintf color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.Write msg
+    Console.ForegroundColor <- old
+
+let cprintfn color (msg : string) =
+    let old = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    Console.WriteLine msg
+    Console.ForegroundColor <- old
+
+
 //TYPE DEFINITIONS------------------------------------------------------------------------------------------------------------------
+let OColour = ConsoleColor.Green
+let XColour = ConsoleColor.Red
+
 type Player =
 |X
 |O
@@ -68,6 +85,11 @@ let mills = [
 
 
 //DISPLAY FUNCTIONS-----------------------------------------------------------------------------------------------------------------
+let printPiece c =
+    match c with 
+    | 'X' -> cprintf XColour "X"
+    | 'O' -> cprintf OColour "O"
+    | _ -> printf " "
 /// gets string representation of player
 let playerToString = function
     | X -> "X"
@@ -88,40 +110,101 @@ let boardToString (board : Cell list) =
 //-----------------------------------------------------------------
 /// takes string representation of the board and displays it
 let displayBoard (boardString : string) =
-    printfn 
-        "    1   2  3   4   5  6   7      \n\
-         A   %c----------%c----------%c   \n\
-         |   | '.       |        .'|      \n\
-         B   |   %c------%c------%c   |   \n\
-         |   |   |'.    |    .'|   |      \n\
-         C   |   |  %c---%c---%c  |   |   \n\
-         |   |   |  |       |  |   |      \n\
-         D   %c---%c--%c       %c--%c---%c\n\
-         |   |   |  |       |  |   |      \n\
-         E   |   |  %c---%c---%c  |   |   \n\
-         |   |   |.'    |    '.|   |      \n\
-         F   |   %c------%c------%c   |   \n\
-         |   |.'        |       '. |      \n\
-         G   %c----------%c----------%c   \n
-         "
-         boardString.[0] boardString.[1] boardString.[2]
-         boardString.[3] boardString.[4] boardString.[5]
-         boardString.[6] boardString.[7] boardString.[8]
-         boardString.[9] boardString.[10] boardString.[11] boardString.[12] boardString.[13] boardString.[14]
-         boardString.[15] boardString.[16] boardString.[17]
-         boardString.[18] boardString.[19] boardString.[20]
-         boardString.[21] boardString.[22] boardString.[23]
+    //Prints each section of the board separately so that pieces can be colour printed
+    printf "    1   2  3   4   5  6   7      \n"
+    printf "A   "
+    printPiece boardString.[0]
+    printf "----------"
+    printPiece boardString.[1]
+    printf "----------"
+    printPiece boardString.[2]
+    printf "   \n"
+    printf "|   | '.       |        .'|      \n"
+    printf "B   |   "
+    printPiece boardString.[3]
+    printf "------"
+    printPiece boardString.[4]
+    printf "------"
+    printPiece boardString.[5]
+    printf "   |   \n"
+    printf "|   |   |'.    |    .'|   |      \n"
+    printf "C   |   |  "
+    printPiece boardString.[6]
+    printf "---"
+    printPiece boardString.[7]
+    printf "---"
+    printPiece boardString.[8]
+    printf "  |   |   \n"
+    printf "|   |   |  |       |  |   |      \n"
+    printf "D   "
+    printPiece boardString.[9]
+    printf "---"
+    printPiece boardString.[10]
+    printf "--"
+    printPiece boardString.[11]
+    printf "       "
+    printPiece boardString.[12]
+    printf "--"
+    printPiece boardString.[13]
+    printf "---"
+    printPiece boardString.[14]
+    printf "\n"
+    printf "|   |   |  |       |  |   |      \n"
+    printf "E   |   |  "
+    printPiece boardString.[15]
+    printf "---"
+    printPiece boardString.[16]
+    printf "---"
+    printPiece boardString.[17]
+    printf "  |   |   \n"
+    printf "|   |   |.'    |    '.|   |      \n"
+    printf "F   |   "
+    printPiece boardString.[18]
+    printf "------"
+    printPiece boardString.[19]
+    printf "------"
+    printPiece boardString.[20]
+    printf "   |   \n"
+    printf "|   |.'        |       '. |      \n"
+    printf "G   "
+    printPiece boardString.[21]
+    printf "----------"
+    printPiece boardString.[22]
+    printf "----------"
+    printPiece boardString.[23]
+    printf "   \n"
+    
+//Old print method without different colours for players    
+//    printfn 
+//        "    1   2  3   4   5  6   7      \n\
+//         A   %c----------%c----------%c   \n\
+//         |   | '.       |        .'|      \n\
+//         B   |   %c------%c------%c   |   \n\
+//         |   |   |'.    |    .'|   |      \n\
+//         C   |   |  %c---%c---%c  |   |   \n\
+//         |   |   |  |       |  |   |      \n\
+//         D   %c---%c--%c       %c--%c---%c\n\
+//         |   |   |  |       |  |   |      \n\
+//         E   |   |  %c---%c---%c  |   |   \n\
+//         |   |   |.'    |    '.|   |      \n\
+//         F   |   %c------%c------%c   |   \n\
+//         |   |.'        |       '. |      \n\
+//         G   %c----------%c----------%c   \n
+//         "
+//         boardString.[0] boardString.[1] boardString.[2]
+//         boardString.[3] boardString.[4] boardString.[5]
+//         boardString.[6] boardString.[7] boardString.[8]
+//         boardString.[9] boardString.[10] boardString.[11] boardString.[12] boardString.[13] boardString.[14]
+//         boardString.[15] boardString.[16] boardString.[17]
+//         boardString.[18] boardString.[19] boardString.[20]
+//         boardString.[21] boardString.[22] boardString.[23]
 
 //-----------------------------------------------------------------
 ///displays the stones for each player
 let displayScore (x, o) =
     //generate display string from number of stones
-    printfn 
-        "Player X: %s\n\
-         Player O: %s 
-        " 
-        (String.concat "" (Seq.init x (fun _ -> "x")))
-        (String.concat "" (Seq.init o (fun _ -> "o")))
+    cprintfn XColour ("Player X: " + String.concat "" (Seq.init x (fun _ -> "x")))
+    cprintfn OColour ("Player O: " + String.concat "" (Seq.init o (fun _ -> "o"))) 
 
 //-----------------------------------------------------------------    
 /// clears the console and displays the board and player stones
