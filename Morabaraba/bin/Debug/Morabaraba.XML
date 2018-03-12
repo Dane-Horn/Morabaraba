@@ -182,5 +182,20 @@ displays the stones for each player
  gets string representation of player
 </summary>
 </member>
+<member name="M:MorabarabaGame.printPiece(System.Char)">
+<summary>
+Prints a piece in a certain colour depending on what it is
+</summary>
+</member>
+<member name="M:MorabarabaGame.cprintfn(System.ConsoleColor,System.String)">
+<summary>
+Print msg ending in a newline to the console with color
+</summary>
+</member>
+<member name="M:MorabarabaGame.cprintf(System.ConsoleColor,System.String)">
+<summary>
+Print msg to the console with color
+</summary>
+</member>
 </members>
 </doc>

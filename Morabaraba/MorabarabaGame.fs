@@ -471,11 +471,11 @@ let rec doFlyingMove board player ((l, n) as takePos) =
     let playPos = getPosFromUser (playerToString player + (sprintf " place %c%d at: " l n)) (refreshBoard board)
 
     match List.exists (fun item -> item.pos = playPos) (getEmptySquares board.boardState) with //Check that chosen square is Empty
-    | true ->
+    | false ->
         refreshBoard board ()
         printfn "You must place your piece on an empty square"
         doFlyingMove board player takePos
-    | false ->
+    | true ->
         let board = updateSquare board playPos (Flying player)
         let board = updateSquare board takePos Empty
         board, playPos, takePos
