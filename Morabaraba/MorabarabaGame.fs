@@ -355,8 +355,13 @@ let rec shootCow (board : Board) player =
     
     match opponentSquaresNotInMills.Length = 0 with
     | true -> //All opponent's cows are in mills so no cow is shot and the game continues
-        refreshBoard board ()
-        board
+        let inputPos = getPosFromUser "shoot which cow? " (refreshBoard board)
+        match List.exists (fun item -> item.pos = inputPos) opponentSquares with
+        | true -> updateSquare board inputPos Empty
+        | false -> 
+            refreshBoard board ()
+            genericErrorMsg "You have to shoot an opponent's square" false
+            shootCow board player
     |false ->
         let inputPos = getPosFromUser "shoot which cow? " (refreshBoard board)
         match List.exists (fun item -> item.pos = inputPos) opponentSquaresNotInMills with
@@ -611,18 +616,13 @@ let rec runMovingPhase (board : Board) player lastXPlay lastOPlay endCounter =
 
     //change pieces to flying once a player reaches 3 cows
     //otherwise keep the same
+    //both players cannot reach 3 at the same time so the case of both does not need to be checked
     let board = 
-        match numX = 3 with
-        | true ->
-            changeAlltoFlying board X
-        | false ->
-            board
-    let board = 
-        match numO = 3 with
-        | true ->
-            changeAlltoFlying board O
-        | false ->
-            board
+        match numX, numO with
+        | 3, 3 -> changeAlltoFlying (changeAlltoFlying board X) O
+        | 3, _ -> changeAlltoFlying board X
+        | _, 3 -> changeAlltoFlying board O
+        | _ -> board
     
     //end conditions
     refreshBoard board ()
