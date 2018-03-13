@@ -33,7 +33,8 @@ let displayRules () =
         Placing three of your cows in a straight connected line will result in a mill 
         and allow you to remove or \"shoot\" one of your oppponent's cows
         Cows that are in a mill cannot be shot or removed.
-        If you create a mill and all your opponent's cows are in a mill then a mill is created, but no cow is shot.
+        If you create a mill and all your opponent's cows are in a mill, 
+        you may shoot one of their cows, even though they are in a mill.
         Once both players have placed their twelve stones, the moving phase begins.
         
         In the moving phase players can move their cows to an adjacent empty square.

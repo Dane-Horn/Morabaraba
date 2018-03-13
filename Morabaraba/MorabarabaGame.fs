@@ -353,23 +353,17 @@ let rec shootCow (board : Board) player =
         not (isInMill board.boardState item.pos)
     let opponentSquaresNotInMills = List.filter notInMill opponentSquares
     
-    match opponentSquaresNotInMills.Length = 0 with
-    | true -> //All opponent's cows are in mills so no cow is shot and the game continues
+    let rec shoot () =
         let inputPos = getPosFromUser "shoot which cow? " (refreshBoard board)
-        match List.exists (fun item -> item.pos = inputPos) opponentSquares with
-        | true -> updateSquare board inputPos Empty
-        | false -> 
-            refreshBoard board ()
-            genericErrorMsg "You have to shoot an opponent's square" false
-            shootCow board player
-    |false ->
-        let inputPos = getPosFromUser "shoot which cow? " (refreshBoard board)
-        match List.exists (fun item -> item.pos = inputPos) opponentSquaresNotInMills with
-        | true -> updateSquare board inputPos Empty
-        | false -> 
-            refreshBoard board ()
-            genericErrorMsg "You have to shoot an opponent's square that is not in a mill, select another one" false
-            shootCow board player
+        match opponentSquaresNotInMills, opponentSquares with
+        | [], shootableSquares | shootableSquares, _ ->
+            match List.exists (fun item -> item.pos = inputPos) shootableSquares with
+            | true -> updateSquare board inputPos Empty
+            | false -> 
+                refreshBoard board ()
+                genericErrorMsg "Invalid selection, choose another cow to shoot" false
+                shoot ()
+    shoot ()        
 //HELPER FUNCTIONS------------------------------------------------------------------------------------------------------------------
 
 //PLACING PHASE FUNCTIONS-----------------------------------------------------------------------------------------------------------
@@ -380,9 +374,8 @@ let rec shootCow (board : Board) player =
 /// <param name="board"> The current board </param>
 /// <param name="player"> The current player </param>
 let rec placePiece board player =
-    let playPos = getPosFromUser (playerToString player + "'s turn: ") (refreshBoard board)
-    let pieceState = getStateFromPos board.boardState playPos 
-    match pieceState with //checks that chosen square is empty
+    let playPos = getPosFromUser (playerToString player + "'s turn: ") (refreshBoard board) 
+    match getStateFromPos board.boardState playPos with //checks that chosen square is empty
     | Normal _ | Flying _ -> 
         refreshBoard board ()
         printfn "That square is already occupied, choose another square"
@@ -391,10 +384,8 @@ let rec placePiece board player =
         let board = updateSquare board playPos (Normal player)
         let (XStones, OStones) = board.stones
         match player with
-        | X ->
-            ({board with stones = (XStones - 1, OStones)}, playPos)
-        | O ->
-            ({board with stones = (XStones, OStones - 1)}, playPos)
+        | X -> ({board with stones = (XStones - 1, OStones)}, playPos)
+        | O -> ({board with stones = (XStones, OStones - 1)}, playPos)
 
 //-----------------------------------------------------------------
 /// <summary>
@@ -514,9 +505,7 @@ let rec doNormalMove board neighbours player ((l, n) as takePos) =
 /// <param name="player"> The current player </param>
 let rec movePiece board player =
     let playPos = getPosFromUser (playerToString player + " select piece to move: ") (refreshBoard board)
-
     let pieceState = getStateFromPos board.boardState playPos
-    
     match pieceState = Normal player || pieceState = Flying player with //check that player chose one of their pieces
     | false ->
         refreshBoard board ()
@@ -527,11 +516,8 @@ let rec movePiece board player =
         | true ->
             doFlyingMove board player playPos
         | false -> //if not Flying piece is Normal and so a check must be made that piece has at least one Empty neighbour
-
             let neighbours = getNeighbourCells board.boardState playPos
-
             let emptyNeighbours = List.filter (fun item -> item.state = Empty) neighbours
-            
             match emptyNeighbours with
             | [] -> 
                 refreshBoard board ()
@@ -550,13 +536,10 @@ let canPlay board player =
     match getNumPlayerSquares board player <= 3 with //if player has 3 or fewer cows then it is guaranteed that they can play
     | true -> true
     | false ->
-
         let playerSquares = getPlayerSquares board player
-        
         let cellHasEmptyNeighbour (item : Cell) =
-           let neighbours = getNeighbourCells board item.pos 
-           List.exists (fun state -> state.state = Empty) neighbours
-
+            let neighbours = getNeighbourCells board item.pos 
+            List.exists (fun state -> state.state = Empty) neighbours
         List.exists cellHasEmptyNeighbour playerSquares
 
 //-----------------------------------------------------------------
