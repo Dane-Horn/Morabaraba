@@ -267,7 +267,8 @@ let isValidPos = function
     | ('G', 1) | ('G', 4) | ('G', 7) -> true
     | _ -> false
 
-//-----------------------------------------------------------------    
+//----------------------------------------------------------------- 
+  
 /// <summary>
 /// Gets a position of type char*int from the user.
 /// The function is recursively called until valid input is given
@@ -504,27 +505,28 @@ let rec doNormalMove board neighbours player ((l, n) as takePos) =
 /// <param name="board"> The current board </param>
 /// <param name="player"> The current player </param>
 let rec movePiece board player =
+    let (|OfCurr|) player state =
+        state = Normal player || state = Flying player
+
     let playPos = getPosFromUser (playerToString player + " select piece to move: ") (refreshBoard board)
     let pieceState = getStateFromPos board.boardState playPos
-    match pieceState = Normal player || pieceState = Flying player with //check that player chose one of their pieces
-    | false ->
+    match pieceState with 
+    | OfCurr player false -> //filter out pieces that aren't the player's
         refreshBoard board ()
         printfn "You must select one of your pieces"
         movePiece board player
-    | true ->
-        match pieceState = Flying player with //if Flying piece can move anywhere
-        | true ->
-            doFlyingMove board player playPos
-        | false -> //if not Flying piece is Normal and so a check must be made that piece has at least one Empty neighbour
-            let neighbours = getNeighbourCells board.boardState playPos
-            let emptyNeighbours = List.filter (fun item -> item.state = Empty) neighbours
-            match emptyNeighbours with
-            | [] -> 
-                refreshBoard board ()
-                printfn "This piece has no empty neighbours, choose another one"
-                movePiece board player
-            | _ ->
-                doNormalMove board emptyNeighbours player playPos             
+    | Flying _ -> //if flying do flying move
+        doFlyingMove board player playPos
+    | _ -> //if not flying then must be normal cow
+        let neighbours = getNeighbourCells board.boardState playPos
+        let emptyNeighbours = List.filter (fun item -> item.state = Empty) neighbours
+        match emptyNeighbours with
+        | [] -> 
+            refreshBoard board ()
+            printfn "This piece has no empty neighbours, choose another one"
+            movePiece board player
+        | _ ->
+            doNormalMove board emptyNeighbours player playPos             
 
 //-----------------------------------------------------------------
 /// <summary>
