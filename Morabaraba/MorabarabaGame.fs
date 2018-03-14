@@ -637,35 +637,44 @@ let rec runMovingPhase (board : Board) player lastXPlay lastOPlay endCounter =
 //MAIN GAME LOOP--------------------------------------------------------------------------------------------------------------------
 /// Runs main game loop and displays a message based on final game state
 let rec runGame () =
+
+    let (|OWin|XWin|MovePhase|Draw|) ((state, board) : GameState*Board) =
+        match state with
+        | Drawn -> Draw
+        | MovingPhase ->
+            match canPlay board.boardState O with
+            | false -> XWin
+            | true ->
+                match canPlay board.boardState X with
+                | false -> OWin
+                | true -> MovePhase
+        | _ -> failwith "Placing phase returned an abnormal state"
+
     let board = initialBoard
 
     match runPlacingPhase board X with //Game always starts with X
-    |Drawn, _ ->
+    | Draw ->
         printfn "Game drawn with no mills created"
         Console.ReadLine () |> ignore
-    |MovingPhase, board ->
-        match canPlay board.boardState X with
-        | false -> 
+    | OWin -> 
+        printfn "O has won!"
+        Console.ReadLine () |> ignore
+    | XWin ->
+        printfn "X has won!"
+        Console.ReadLine () |> ignore
+    | MovePhase ->
+        refreshBoard board ()
+        match runMovingPhase board X (('Z', 8), ('Z', 8)) (('Z', 8), ('Z', 8)) -1 with //phase starts with X and impossible states are given for the last play of each player
+        | Drawn ->                                                                     //endCounter starts at -1 because it needs to be 0 as both players reach 3 pieces each
+            printfn "Game has been drawn"
+            Console.ReadLine () |> ignore
+        | Won X ->
+            printfn "X has won!"
+            Console.ReadLine () |> ignore
+        | Won O ->
             printfn "O has won!"
             Console.ReadLine () |> ignore
-        | true ->
-            match canPlay board.boardState O with
-                | false -> 
-                    printfn "X has won!"
-                    Console.ReadLine () |> ignore
-                | true ->
-                    refreshBoard board ()
-                    match runMovingPhase board X (('Z', 8), ('Z', 8)) (('Z', 8), ('Z', 8)) -1 with //phase starts with X and impossible states are given for the last play of each player
-                    | Drawn ->                                                                     //endCounter starts at -1 because it needs to be 0 as both players reach 3 pieces each
-                        printfn "Game has been drawn"
-                        Console.ReadLine () |> ignore
-                    | Won X ->
-                        printfn "X has won!"
-                        Console.ReadLine () |> ignore
-                    | Won O ->
-                        printfn "O has won!"
-                        Console.ReadLine () |> ignore
-                    | _ -> failwith "Lol, this was not supposed to happen"
+        | _ -> failwith "Lol, this was not supposed to happen"
     | _ -> failwith "Something went terribly wrong"
     //final message and possible replay
     Console.Clear ()
