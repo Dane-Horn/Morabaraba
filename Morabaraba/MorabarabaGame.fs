@@ -652,7 +652,8 @@ let rec runGame () =
 
     let board = initialBoard
 
-    match runPlacingPhase board X with //Game always starts with X
+    let state, board = runPlacingPhase board X
+    match (state, board) with //Game always starts with X
     | Draw ->
         printfn "Game drawn with no mills created"
         Console.ReadLine () |> ignore
