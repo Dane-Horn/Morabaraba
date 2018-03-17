@@ -7,7 +7,7 @@
  Runs main game loop and displays a message based on final game state
 </summary>
 </member>
-<member name="M:MorabarabaGame.runMovingPhase(MorabarabaGame.Board,MorabarabaGame.Player,System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Int32)">
+<member name="M:MorabarabaGame.runMovingPhase``2(MorabarabaGame.Player,System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Tuple{System.Char,System.Int32},System.Int32,MorabarabaGame.Board)">
  <summary>Executes the entire moving phase for Morabaraba </summary>
  <param name="board"> Board record holding the boardState and player stones </param>
  <param name="player"> The current player </param>
@@ -68,7 +68,7 @@
 Takes a position and returns the positions of the adjacent squares
 </summary>
 </member>
-<member name="M:MorabarabaGame.runPlacingPhase(MorabarabaGame.Board,MorabarabaGame.Player)">
+<member name="M:MorabarabaGame.runPlacingPhase``2(MorabarabaGame.Player,MorabarabaGame.Board)">
  <summary>
  Executes the entire placing phase for Morabaraba
  </summary>

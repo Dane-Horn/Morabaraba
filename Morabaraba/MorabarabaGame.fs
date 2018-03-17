@@ -22,8 +22,10 @@ type Cow =
 type GameState =
 |PlacingPhase
 |MovingPhase
-|Drawn
-|Won of Player
+|DrawnInPlacing
+|DrawnInMoving
+|WonInPlacing of Player
+|WonInMoving of Player
 
 
 type Cell = 
@@ -72,7 +74,14 @@ let mills = [
              (('G', 1), ('F', 2), ('E', 3));
              (('G', 7), ('F', 6), ('E', 5));
             ]
+            
+            
 
+
+
+type GameStatus<'a, 'b> =
+| Playing of Board
+| Done of GameState
 
 //DISPLAY FUNCTIONS-----------------------------------------------------------------------------------------------------------------
 ///Print msg to the console with color
@@ -178,31 +187,6 @@ let displayBoard (boardString : string) =
     printf "----------"
     printPiece boardString.[23]
     printf "   \n"
-    
-//Old print method without different colours for players    
-//    printfn 
-//        "    1   2  3   4   5  6   7      \n\
-//         A   %c----------%c----------%c   \n\
-//         |   | '.       |        .'|      \n\
-//         B   |   %c------%c------%c   |   \n\
-//         |   |   |'.    |    .'|   |      \n\
-//         C   |   |  %c---%c---%c  |   |   \n\
-//         |   |   |  |       |  |   |      \n\
-//         D   %c---%c--%c       %c--%c---%c\n\
-//         |   |   |  |       |  |   |      \n\
-//         E   |   |  %c---%c---%c  |   |   \n\
-//         |   |   |.'    |    '.|   |      \n\
-//         F   |   %c------%c------%c   |   \n\
-//         |   |.'        |       '. |      \n\
-//         G   %c----------%c----------%c   \n
-//         "
-//         boardString.[0] boardString.[1] boardString.[2]
-//         boardString.[3] boardString.[4] boardString.[5]
-//         boardString.[6] boardString.[7] boardString.[8]
-//         boardString.[9] boardString.[10] boardString.[11] boardString.[12] boardString.[13] boardString.[14]
-//         boardString.[15] boardString.[16] boardString.[17]
-//         boardString.[18] boardString.[19] boardString.[20]
-//         boardString.[21] boardString.[22] boardString.[23]
 
 //-----------------------------------------------------------------
 ///displays the stones for each player
@@ -394,7 +378,7 @@ let rec placePiece board player =
 /// </summary>
 /// <param name="board"> The current board </param>
 /// <param name="player"> The current player </param>
-let rec runPlacingPhase (board : Board) player  =
+let rec runPlacingPhase player (board : Board)  =
     refreshBoard board ()
     let board, pos = placePiece board player
     let board = 
@@ -408,10 +392,10 @@ let rec runPlacingPhase (board : Board) player  =
     | (0, 0) -> //Stop placing when both players run out of stones
         refreshBoard board ()
         match getNumPlayerSquares board.boardState X = 12 && getNumPlayerSquares board.boardState O = 12 with //if both players still have all 12 stones on board then no cows have been shot
-        | true -> Drawn, board                                                                                //and the board is full, meaning that no one can move and the game is drawn
-        | false -> MovingPhase, board
+        | true -> Done DrawnInPlacing                           //and the board is full, meaning that no one can move and the game is drawn
+        | false -> Playing board
     | _ -> 
-        runPlacingPhase board (getOpponent player)
+        runPlacingPhase (getOpponent player) board 
 //PLACING PHASE FUNCTIONS-----------------------------------------------------------------------------------------------------------
 
 
@@ -538,11 +522,11 @@ let canPlay board player =
     match getNumPlayerSquares board player <= 3 with //if player has 3 or fewer cows then it is guaranteed that they can play
     | true -> true
     | false ->
-        let playerSquares = getPlayerSquares board player
         let cellHasEmptyNeighbour (item : Cell) =
-            let neighbours = getNeighbourCells board item.pos 
-            List.exists (fun state -> state.state = Empty) neighbours
-        List.exists cellHasEmptyNeighbour playerSquares
+            getNeighbourCells board item.pos 
+            |> List.exists (fun state -> state.state = Empty)
+        getPlayerSquares board player
+        |> List.exists cellHasEmptyNeighbour
 
 //-----------------------------------------------------------------
 /// <summary>
@@ -552,15 +536,9 @@ let canPlay board player =
 /// <param name="board"> The current board</param>
 /// <param name="player"> The player whose cows must be changed</param>
 let changeAlltoFlying board player =
-    let playerSquares = getPlayerSquares board.boardState player
-
-    let rec updateBoard rest outBoard = 
-        match rest with
-        | [] -> outBoard
-        | first::rest ->
-            let newBoard = updateSquare outBoard first.pos (Flying player)
-            updateBoard rest newBoard
-    updateBoard playerSquares board
+    getPlayerSquares board.boardState player
+    |> List.fold (fun state item -> 
+                    updateSquare state item.pos (Flying player)) board 
 
 //-----------------------------------------------------------------
 /// <summary>Executes the entire moving phase for Morabaraba </summary>
@@ -570,7 +548,7 @@ let changeAlltoFlying board player =
 /// <param name="lastOPlay"> Last full move for player O (piece selected and where it was moved to) </param>
 /// <param name="endCounter"> Draw counter that is incremented when both players have 3 stones, game is drawn when counter reaches 10 </param>
 /// <returns> GameState once all play has been concluded </returns>
-let rec runMovingPhase (board : Board) player lastXPlay lastOPlay endCounter =
+let rec runMovingPhase player lastXPlay lastOPlay endCounter (board : Board)  =
 
     let board, playPos, lastPos = movePiece board player //get new board state  
     //lastPos is old position of the piece that was just moved
@@ -579,23 +557,20 @@ let rec runMovingPhase (board : Board) player lastXPlay lastOPlay endCounter =
     //check that a new valid mill has been created 
     //and then shoot and return new board state if one has
     let board = 
-        match isInMill board.boardState playPos with
-        | true ->
-            match player with
-            | X ->
-                match (lastPos, playPos) = lastXPlay with //checks that player is not recreating a mill in the same way they broke it the previous turn
-                | true -> board
-                | false ->
-                    refreshBoard board ()
-                    shootCow board player    
-            | O ->
-                match (lastPos, playPos) = lastOPlay with //checks that player is not recreating a mill in the same way they broke it the previous turn
-                | true -> board
-                | false ->
-                    refreshBoard board ()
-                    shootCow board player
-        | _ ->
-            board
+        match isInMill board.boardState playPos, player with
+        | true, X ->
+            match (lastPos, playPos) = lastXPlay with //checks that player is not recreating a mill in the same way they broke it the previous turn
+            | true -> board
+            | false ->
+                refreshBoard board ()
+                shootCow board player    
+        | true, O ->
+            match (lastPos, playPos) = lastOPlay with //checks that player is not recreating a mill in the same way they broke it the previous turn
+            | true -> board
+            | false ->
+                refreshBoard board ()
+                shootCow board player
+        | _ -> board
 
     let numX, numO = getNumPlayerSquares board.boardState X, getNumPlayerSquares board.boardState O
 
@@ -611,74 +586,59 @@ let rec runMovingPhase (board : Board) player lastXPlay lastOPlay endCounter =
     
     //end conditions
     refreshBoard board ()
-    match endCounter = 10 with //10 moves have been played with both players on 3 Flying Cows
-    | true -> Drawn
-    | false -> 
-        match numX < 3 ||  not (canPlay board.boardState X) with // X has fewer than 3 cows or cannot play
-        | true ->
-            Won O
-        | false ->
-            match numO < 3 || not (canPlay board.boardState O) with // O has fewer than 3 cows or cannot play
-            | true ->
-                Won X
-            | false ->
-                let endCounter = 
-                    match numO = 3 && numX = 3 with //increment counter if both players are on 3 cows
-                    | true -> endCounter + 1
-                    | false -> -1
-                match player with
-                | X ->
-                    runMovingPhase board O (playPos, lastPos) lastOPlay endCounter
-                | O ->
-                    runMovingPhase board X lastXPlay (playPos, lastPos) endCounter
+    match endCounter with //10 moves have been played with both players on 3 Flying Cows
+    | 10 -> Done DrawnInMoving
+    | _ -> 
+        match (numX, canPlay board.boardState X), (numO, canPlay board.boardState O) with // X has fewer than 3 cows or cannot play
+        | (2, _), _ | (_, false), _ -> Done (WonInMoving O)
+        | _, (2, _) | _, (_, false) -> Done (WonInMoving X)
+        | _ ->
+            let endCounter = 
+                match numO = 3 && numX = 3 with //increment counter if both players are on 3 cows
+                | true -> endCounter + 1
+                | false -> -1
+            match player with
+            | X ->
+                runMovingPhase O (playPos, lastPos) lastOPlay endCounter board 
+            | O ->                                                       
+                runMovingPhase X lastXPlay (playPos, lastPos) endCounter board 
 
 //MOVING PHASE FUNCTIONS------------------------------------------------------------------------------------------------------------
 
 //MAIN GAME LOOP--------------------------------------------------------------------------------------------------------------------
+let bind func statusInput = //Allows a function to take a GameStatus input and potentially transition
+    match statusInput with  //from Playing to Done
+    | Playing p -> func p
+    | Done d -> Done d
+
+let (|>=) statusInput func = //Acts like a pipe for the GameStatus monad
+    bind func statusInput
+
+let (>>=) switch1 switch2 = //Acts like a compose for the GameStatus monad
+    switch1 >> (bind switch2)
+
+let checkPlacingWin player board =
+    match canPlay board.boardState player with
+    | true -> Playing board
+    | false -> Done (WonInPlacing player)
+
+let displayEndGameMessage = function
+    | Done (DrawnInPlacing) -> printfn "Game drawn in placing phase with no mills created"
+    | Done (DrawnInMoving)  -> printfn "Game drawn after 10 moves with no shooting while both players have 3 cows"
+    | Done (WonInPlacing O) -> printfn "O won in the placing phase by completely surrounding X!"
+    | Done (WonInMoving O)  -> printfn "O won in the moving phase"
+    | Done (WonInPlacing X) -> printfn "X won in the placing phase by completely surrounding O!"
+    | Done (WonInMoving X)  -> printfn "X won in the moving phase"
+    | _ -> failwith "A proper end result was not returned"
 /// Runs main game loop and displays a message based on final game state
 let rec runGame () =
-
-    let (|OWin|XWin|MovePhase|Draw|) ((state, board) : GameState*Board) =
-        match state with
-        | Drawn -> Draw
-        | MovingPhase ->
-            match canPlay board.boardState O with
-            | false -> XWin
-            | true ->
-                match canPlay board.boardState X with
-                | false -> OWin
-                | true -> MovePhase
-        | _ -> failwith "Placing phase returned an abnormal state"
-
-    let board = initialBoard
-
-    let state, board = runPlacingPhase board X
-    match (state, board) with //Game always starts with X
-    | Draw ->
-        printfn "Game drawn with no mills created"
-        Console.ReadLine () |> ignore
-    | OWin -> 
-        printfn "O has won!"
-        Console.ReadLine () |> ignore
-    | XWin ->
-        printfn "X has won!"
-        Console.ReadLine () |> ignore
-    | MovePhase ->
-        refreshBoard board ()
-        match runMovingPhase board X (('Z', 8), ('Z', 8)) (('Z', 8), ('Z', 8)) -1 with //phase starts with X and impossible states are given for the last play of each player
-        | Drawn ->                                                                     //endCounter starts at -1 because it needs to be 0 as both players reach 3 pieces each
-            printfn "Game has been drawn"
-            Console.ReadLine () |> ignore
-        | Won X ->
-            printfn "X has won!"
-            Console.ReadLine () |> ignore
-        | Won O ->
-            printfn "O has won!"
-            Console.ReadLine () |> ignore
-        | _ -> failwith "Lol, this was not supposed to happen"
-    | _ -> failwith "Something went terribly wrong"
-    //final message and possible replay
-    Console.Clear ()
+    let runMainLoop =
+        runPlacingPhase X
+        >>= (checkPlacingWin O)
+        >>= (checkPlacingWin X)
+        >>= (runMovingPhase X (('Z', 8), ('Z', 8)) (('Z', 8), ('Z', 8)) -1)
+        >>  displayEndGameMessage  
+    initialBoard |> runMainLoop
     printf "Would you like to play again [y/n]? "
     match Console.ReadLine () with
     | "y" ->
